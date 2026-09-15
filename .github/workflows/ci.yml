@@ -1,0 +1,54 @@
+# Runs the full test suite on every push and pull request (Node 22 and 24).
+# After a green run on main, deploys to the server over SSH, once you have
+# set it up (deploy/README.md, step 8) and created the repository variable
+# DEPLOY_ENABLED = true.
+
+name: Tests and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Tests (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+
+  deploy:
+    name: Deploy to szigzug.hu
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Run deploy.sh on the server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # The server's authorized_keys entry forces this key to run deploy.sh and nothing else.
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "szigzug@${DEPLOY_HOST}"

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Account management shortcut. Install as /usr/local/bin/szigzug-users (deploy/README.md, step 4).
+# Usage: sudo szigzug-users create bence --name "Tornai Bence" --role admin
+exec sudo -u szigzug env DB_PATH=/var/lib/szigzug/szigzug.db \
+  /usr/bin/node --disable-warning=ExperimentalWarning /opt/szigzug/bin/users.js "$@"

@@ -1,0 +1,6 @@
+# Always LF line endings, also on Windows checkouts: shell scripts with CRLF
+# endings fail on the Linux server.
+* text=auto eol=lf
+*.svg text eol=lf
+*.png binary
+*.db binary

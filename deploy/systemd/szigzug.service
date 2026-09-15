@@ -1,0 +1,34 @@
+# szigzug.hu app. Install as /etc/systemd/system/szigzug.service (deploy/README.md, step 3).
+[Unit]
+Description=szigzug.hu (jubilee points competition)
+After=network.target
+
+[Service]
+Type=simple
+User=szigzug
+Group=szigzug
+WorkingDirectory=/opt/szigzug
+EnvironmentFile=/etc/szigzug/szigzug.env
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning src/server.js
+Restart=always
+RestartSec=2
+
+# Hardening: the app can only write to its data directory.
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/szigzug
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

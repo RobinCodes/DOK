@@ -1,1 +1,10 @@
 /Docs/
+/.claude/
+/data/
+/backups/
+/coverage/
+node_modules/
+*.db
+*.db-wal
+*.db-shm
+.env

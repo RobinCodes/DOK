@@ -1,0 +1,13 @@
+# Database backup. Install as /etc/systemd/system/szigzug-backup.service (deploy/README.md, step 7).
+[Unit]
+Description=Back up the szigzug.hu database
+
+[Service]
+Type=oneshot
+User=szigzug
+Group=szigzug
+WorkingDirectory=/opt/szigzug
+EnvironmentFile=/etc/szigzug/szigzug.env
+Environment=BACKUP_DIR=/var/backups/szigzug
+Environment=BACKUP_KEEP=168
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning bin/backup.js
